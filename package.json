@@ -1,0 +1,23 @@
+{
+  "name": "backend-moviereviews",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "cors": "^2.8.6",
+    "dotenv": "^18.0.4",
+    "express": "^5.2.1",
+    "helmet": "^8.3.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.14"
+  },
+  "type": "module",
+  "scripts":{
+    "dev": "nodemon src/server.js",
+    "start": "node src/Server.js"
+  }
+}
