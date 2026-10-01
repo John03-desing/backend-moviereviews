@@ -5,7 +5,9 @@ import {
     findReviewsByUser,
     findReviewByIdAndUser,
     updateReviewByIdAndUser,
-    deleteReviewByIdAndUser
+    deleteReviewByIdAndUser,
+    findReviewsForAdmin,
+    deleteReviewByAdmin
 } from '../repositories/review.repository.js'
 
 import { getMovieDetails } from './movie.service.js'
@@ -233,6 +235,38 @@ export const deleteReview = async ({
     if (!deleted) {
         const error =
             new Error('Reseña no encontrada')
+
+        error.status = 404
+
+        throw error
+    }
+
+    return deleted
+}
+/*Seccion del Admin*/
+export const getAdminReviews = async ({ username = '' } = {}) => {
+    const reviews =
+        await findReviewsForAdmin(
+            username
+        )
+
+    return Promise.all(
+        reviews.map(enrichReview)
+    )
+}
+
+
+export const adminDeleteReview = async ( reviewId ) => {
+    const deleted =
+        await deleteReviewByAdmin(
+            reviewId
+        )
+
+    if (!deleted) {
+        const error =
+            new Error(
+                'Reseña no encontrada'
+            )
 
         error.status = 404
 

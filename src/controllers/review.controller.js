@@ -149,3 +149,53 @@ export const deleteReview = async (
         next(error)
     }
 }
+
+/* Seccion del Admin */
+export const getAdminReviews = async ( req, res, next ) => {
+    try {
+        const username =
+            String(
+                req.query.username ?? ''
+            ).trim()
+
+        const reviews =
+            await reviewService.getAdminReviews({
+                username
+            })
+
+        return res.status(200).json({
+            reviews
+        })
+    } catch (error) {
+        next(error)
+    }
+}
+
+
+export const deleteReviewAsAdmin = async ( req, res, next ) => {
+    try {
+        const reviewId =
+            Number(req.params.id)
+
+        if (
+            !Number.isInteger(reviewId) ||
+            reviewId <= 0
+        ) {
+            return res.status(400).json({
+                message:
+                    'ID de reseña inválido'
+            })
+        }
+
+        await reviewService.adminDeleteReview(
+            reviewId
+        )
+
+        return res.status(200).json({
+            message:
+                'Reseña eliminada correctamente'
+        })
+    } catch (error) {
+        next(error)
+    }
+}

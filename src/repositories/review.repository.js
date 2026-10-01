@@ -182,3 +182,49 @@ export const deleteReviewByIdAndUser = async ({
 
     return result.rows[0]
 }
+
+/*Funcionalidades para el admin*/
+export const findReviewsForAdmin = async ( username = '' ) => {
+    const result = await pool.query(
+        `
+        SELECT
+            r.id,
+            r.movie_id,
+            r.user_id,
+            r.rating,
+            r.comment,
+            r.created_at,
+            r.updated_at,
+            r.status,
+            u.username
+        FROM reviews r
+        INNER JOIN users u
+            ON u.id = r.user_id
+        WHERE
+            $1 = ''
+            OR u.username ILIKE '%' || $1 || '%'
+        ORDER BY r.created_at DESC
+        `,
+        [
+            username
+        ]
+    )
+
+    return result.rows
+}
+
+
+export const deleteReviewByAdmin = async ( reviewId ) => {
+    const result = await pool.query(
+        `
+        DELETE FROM reviews
+        WHERE id = $1
+        RETURNING id
+        `,
+        [
+            reviewId
+        ]
+    )
+
+    return result.rows[0]
+}
