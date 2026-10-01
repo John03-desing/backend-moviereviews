@@ -5,6 +5,8 @@ import authRoutes from './routes/auth.routes.js'
 import { errorHandler } from './middlewares/error.middleware.js'
 import movieRoutes from './routes/movie.routes.js'
 import peopleRoutes from './routes/people.routes.js'
+import reviewRoutes from './routes/review.routes.js'
+import favoriteRoutes from './routes/favorite.routes.js'
 
 const app = express()
 
@@ -15,6 +17,8 @@ app.use(express.json())
 app.use('/api/auth', authRoutes)
 app.use('/api/movies', movieRoutes)
 app.use('/api/people', peopleRoutes)
+app.use('/api/reviews', reviewRoutes)
+app.use('/api/favorites', favoriteRoutes)
 
 app.use(errorHandler)
 

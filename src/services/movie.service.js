@@ -1,17 +1,76 @@
-const TMDB_BASE_URL = process.env.TMDB_BASE_URL
-const TMDB_ACCESS_TOKEN = process.env.TMDB_ACCESS_TOKEN
+import {
+    tmdbRequest,
+    getImageUrl
+} from './tmdb.service.js'
 
-const getMexicoDate = () => {
-    return new Intl.DateTimeFormat('en-CA', {
+
+export const searchMovies = async (query) => {
+    if (!query?.trim()) {
+        return []
+    }
+
+    const params = new URLSearchParams({
+        query: query.trim(),
+        language: 'es-MX',
+        region: 'MX',
+        include_adult: 'false',
+        page: '1',
+    })
+
+    const data = await tmdbRequest(
+        `/search/movie?${params.toString()}`
+    )
+
+    return data.results
+        .filter(movie => movie.poster_path)
+        .slice(0, 8)
+        .map(movie => ({
+            id: movie.id,
+            title: movie.title,
+            releaseDate: movie.release_date,
+            year: movie.release_date
+                ? movie.release_date.slice(0, 4)
+                : null,
+            posterUrl: getImageUrl(movie.poster_path),
+            genreIds: movie.genre_ids || [],
+        }))
+}
+
+
+export const getMovieDetails = async (movieId) => {
+    const movie = await tmdbRequest(
+        `/movie/${movieId}?language=es-MX`
+    )
+
+    return {
+        id: movie.id,
+        title: movie.title,
+        releaseDate: movie.release_date,
+        year: movie.release_date
+            ? movie.release_date.slice(0, 4)
+            : null,
+        posterUrl: getImageUrl(movie.poster_path),
+        genres: movie.genres || [],
+    }
+}
+
+
+export const getMovieGenres = async () => {
+    const data = await tmdbRequest(
+        '/genre/movie/list?language=es-MX'
+    )
+
+    return data.genres
+}
+
+
+export const getUpcomingMovies = async () => {
+    const today = new Intl.DateTimeFormat('en-CA', {
         timeZone: 'America/Mexico_City',
         year: 'numeric',
         month: '2-digit',
         day: '2-digit',
     }).format(new Date())
-}
-
-export const getUpcomingMovies = async () => {
-    const today = getMexicoDate()
 
     const params = new URLSearchParams({
         language: 'es-MX',
@@ -24,30 +83,11 @@ export const getUpcomingMovies = async () => {
         with_release_type: '3|2',
     })
 
-    const response = await fetch(
-        `${TMDB_BASE_URL}/discover/movie?${params.toString()}`,
-        {
-            method: 'GET',
-            headers: {
-                accept: 'application/json',
-                Authorization: `Bearer ${TMDB_ACCESS_TOKEN}`,
-            },
-        }
+    const data = await tmdbRequest(
+        `/discover/movie?${params.toString()}`
     )
 
-    if (!response.ok) {
-        const error = new Error(
-            'Error al obtener los próximos estrenos desde TMDB'
-        )
-
-        error.status = response.status
-
-        throw error
-    }
-
-    const data = await response.json()
-
-    const movies = data.results
+    return data.results
         .filter(movie =>
             movie.poster_path &&
             movie.release_date
@@ -57,8 +97,7 @@ export const getUpcomingMovies = async () => {
             id: movie.id,
             title: movie.title,
             releaseDate: movie.release_date,
-            posterUrl: `https://image.tmdb.org/t/p/w500${movie.poster_path}`,
+            year: movie.release_date.slice(0, 4),
+            posterUrl: getImageUrl(movie.poster_path),
         }))
-
-    return movies
 }
